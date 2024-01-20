@@ -1,6 +1,6 @@
 //maybe this should've been a fork but still
 
-;(function(globalScobe){
+;(function(globalScope){
   // Editable defaults //
   var OmegaExpantaNum = {
     maxOps: 1000, // Maximum number of operations. When it is exceeded, the lowest priority operations are removed. Prevents long loops from eating memory and time.
@@ -39,12 +39,12 @@
     return Math.log10(Number(firstBits))+Math.LOG10E/Math.LOG2E*Number(cutBits);
   }
 
-  Q.fromBigInt(bigint){
+  Q.fromBigInt = function(bigint){
     if(typeof bigint!="bigint") throw Error(`${invalidArgument} Expected a bigint but instead got ${bigint}`);
     let x = new OmegaExpantaNum();
     let abs = bigint<BigInt(0)?-bigint:bigint;
     x.sign = bigint<BigInt(0)?-1:1;
-    if (abs<BigInt(MAX_SAFE_INTEGER) x.array = [[0,Number(abs)]];
+    if (abs<BigInt(MAX_SAFE_INTEGER)) x.array = [[0,Number(abs)]];
     else x.array = [[0,BigIntLog10(abs)],[1,1]];
     x.normalize();
     return x;
@@ -52,13 +52,75 @@
 
   function getHyperE(hyperE){
     if(typeof hyperE!="string") throw Error(`${invalidArgument} Expected a string but instead got ${hyperE}`);
-    if(!/^[-\+]*(0|[1-9]\d*(\.\d*)?|Infinity|NaN|E[1-9]\d*(\.\d*)?(#+[1-9]\d*)*)$/.test(hyperE)) throw Error(`${invalidArgument} Expected a Hyper-E notation number but instead got ${hyperE}`);
-    let sign = (hyperE.substring(0,hyperE.search(/[^-\+]/)).match(/-/).length%2)*2-1
+    if(!/^[-\+]*(0|[1-9]\d*(\.\d*)?|Infinity|NaN|E[1-9]\d*(\.\d*)?((#+|\(#\^[1-9]\d*\))[1-9]\d*)*)$/.test(hyperE)) throw Error(`${invalidArgument} Expected a Hyper-E notation number but instead got ${hyperE}`);
+    let sign = hyperE.substring(0,hyperE.search(/[^-\+]/)).match(/-/g);
+    if(Array.isArray(sign)) sign = sign.length%2*2-1;
+    else sign = -1;
+    sign = -sign;
     hyperE = hyperE.substring(hyperE.search(/[^-\+]/));
+    if(hyperE=="Infinity"){
+      return {
+        sign: sign,
+        argv: [Infinity],
+        hyper: null
+      }
+    }
+    if(hyperE=="NaN"){
+      return {
+        sign: sign,
+        argv: [NaN],
+        hyper: null
+      }
+    }
+    if(!hyperE.includes("E")){
+      return {
+        sign: sign,
+        argv: [+hyperE],
+        hyper: null
+      }
+    }
+    if(!hyperE.includes("#")){
+      return {
+        sign: sign,
+        argv: [+(hyperE.substring(1))],
+        hyper: []
+      }
+    }
     return {
       sign: sign,
-      argv: hyperE.match(/[E#][1-9]\d*/).map((e)=>e.substring(1)),
-      hyper: hyperE.match(/\d#+/).map((e)=>e.length-1)
+      argv: hyperE.match(/[1-9]\d*/g).map((e)=>+(e.substring(1))),
+      hyper: hyperE.match(/(#+(?:[1-9]))|(#\^[1-9]\d*)/g).map((e)=>e.includes("^")?+(e.slice(2)):e.length-1)
+    }
+  }
+
+  Q.fromHyperE = function(hyperE){
+    let packet = getHyperE(hyperE);
+    if(!Array.isArray(packet.hyper) return OmegaExpantaNum.fromNumber(packet.sign*packet.argv[0]);
+    let x = new OmegaExpantaNum();
+    if(packet.hyper.length==0){
+      x[0][1] = packet.argv[0];
+      x[1] = [1,1];
+      x.normalize();
+      return x;
+    }
+    if(Math.max(...packet.hyper)==1){
+      for(let i = 0;i<packet.argv.length;i++){
+        let arg = packet.argv[i];
+        if(i>=2) arg--;
+        x.array[i] = [i,arg];
+      }
+      x.normalize();
+      return x;
+    }
+    for(let i = 0;i<packet.argv.length;i++){
+      let arg = packet.argv[i];
+      if(i==0) x.array[0] = [0,arg]
+      else {
+        hyper = packet.hyper[i-1];
+        if(i>=2) arg--;
+        if(hyper==1) x.array.push([i,arg])
+        else x.layer.push([hyper,arg])
+      }
     }
   }
 
@@ -99,7 +161,7 @@
       }else{
         temp=[[0,NaN]];
         temp2=1;
-        temp3=0;
+        temp3=[0];
       }
       if (typeof temp2=="undefined"){
         x.array=temp.array;
