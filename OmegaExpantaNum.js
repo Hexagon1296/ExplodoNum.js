@@ -88,7 +88,7 @@
     }
     return {
       sign: sign,
-      argv: hyperE.match(/[E#][1-9]\d*(\.\d*)/g).map((e)=>+(e.substring(1))),
+      argv: hyperE.match(/[E#][1-9]\d*(\.\d*)?/g).map((e)=>+(e.substring(1))),
       hyper: hyperE.match(/(#+(?:[1-9]))|(#\^[1-9]\d*)/g).map((e)=>e.includes("^")?+(e.slice(2)):e.length-1)
     }
   }
@@ -120,8 +120,9 @@
         if(i>=2) arg--;
         if(hyper==1) x.array.push([i,arg])
         else x.layer.push([hyper,arg])
-        //E2##2##3 = E2##2#2##2 = E2##2#2#2 = E2##2#(E2##2#2) = E2##2#(E2##(E2##2)) = E2##2#(E2##10^100) = E2##2#
-      }
+        //Ex(#^n)y##z ==
+        //Ex(#^n)y if z = 1
+        //Ex(#^n)y##(z-2)#(Ex)
     }
   }
 
