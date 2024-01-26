@@ -52,7 +52,7 @@
 
   function getHyperE(hyperE){
     if(typeof hyperE!="string") throw Error(`${invalidArgument} Expected a string but instead got ${hyperE}`);
-    if(!/^[-\+]*(0|[1-9]\d*(\.\d*)?|Infinity|NaN|E[1-9]\d*(\.\d*)?((#+|\(#\^[1-9]\d*\))[1-9]\d*)*)$/.test(hyperE)) throw Error(`${invalidArgument} Expected a Hyper-E notation number but instead got ${hyperE}`);
+    if(!/^[-\+]*(0|[1-9]\d*(\.\d*)?|Infinity|NaN|E[1-9]\d*(\.\d*)?(#[1-9]\d*)*)$/.test(hyperE)) throw Error(`${invalidArgument} Expected a Hyper-E notation number but instead got ${hyperE}`);
     let sign = hyperE.substring(0,hyperE.search(/[^-\+]/)).match(/-/g);
     if(Array.isArray(sign)) sign = sign.length%2*2-1;
     else sign = -1;
@@ -61,69 +61,39 @@
     if(hyperE=="Infinity"){
       return {
         sign: sign,
-        argv: [Infinity],
+        argv: Infinity,
         hyper: null
       }
     }
     if(hyperE=="NaN"){
       return {
         sign: sign,
-        argv: [NaN],
-        hyper: null
+        argv: NaN,
       }
     }
     if(!hyperE.includes("E")){
       return {
         sign: sign,
-        argv: [+hyperE],
-        hyper: null
-      }
-    }
-    if(!hyperE.includes("#")){
-      return {
-        sign: sign,
-        argv: [+(hyperE.substring(1))],
-        hyper: []
+        argv: +hyperE
       }
     }
     return {
       sign: sign,
-      argv: hyperE.match(/[E#][1-9]\d*(\.\d*)?/g).map((e)=>+(e.substring(1))),
-      hyper: hyperE.match(/(#+(?:[1-9]))|(#\^[1-9]\d*)/g).map((e)=>e.includes("^")?+(e.slice(2)):e.length-1)
+      argv: hyperE.match(/[1-9]\d*(\.\d*)?/g).map((e)=>+e)
     }
   }
 
   Q.fromHyperE = function(hyperE){
     let packet = getHyperE(hyperE);
-    if(!Array.isArray(packet.hyper) return OmegaExpantaNum.fromNumber(packet.sign*packet.argv[0]);
+    if(!Array.isArray(packet.argv)) return OmegaExpantaNum.fromNumber(packet.sign*packet.argv);
     let x = new OmegaExpantaNum();
-    if(packet.hyper.length==0){
-      x[0][1] = packet.argv[0];
-      x[1] = [1,1];
-      x.normalize();
-      return x;
-    }
-    if(Math.max(...packet.hyper)==1){
-      for(let i = 0;i<packet.argv.length;i++){
-        let arg = packet.argv[i];
-        if(i>=2) arg--;
-        x.array[i] = [i,arg];
-      }
-      x.normalize();
-      return x;
-    }
     for(let i = 0;i<packet.argv.length;i++){
       let arg = packet.argv[i];
-      if(i==0) x.array[0] = [0,arg]
-      else {
-        hyper = packet.hyper[i-1];
-        if(i>=2) arg--;
-        if(hyper==1) x.array.push([i,arg])
-        else x.layer.push([hyper,arg])
-        //Ex(#^n)y##z ==
-        //Ex(#^n)y if z = 1
-        //Ex(#^n)y##(z-2)#(Ex)
+      if(i>=2) arg--;
+      x.array[i] = [i,arg];
     }
+    x.normalize();
+    return x;
   }
 
   //Begin ON/EN.js excerpt
