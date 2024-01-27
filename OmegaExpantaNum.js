@@ -61,14 +61,13 @@
     if(hyperE=="Infinity"){
       return {
         sign: sign,
-        argv: Infinity,
-        hyper: null
+        argv: Infinity
       }
     }
     if(hyperE=="NaN"){
       return {
         sign: sign,
-        argv: NaN,
+        argv: NaN
       }
     }
     if(!hyperE.includes("E")){
@@ -92,6 +91,16 @@
       if(i>=2) arg--;
       x.array[i] = [i,arg];
     }
+    x.normalize();
+    return x;
+  }
+
+  Q.fromObject = function(object){
+    if(typeof object!="object") throw Error(`${invalidArgument} Expected an object but instead got ${object}`);
+    let x = new OmegaExpantaNum();
+    x.layer = Array.from(object.layer);
+    x.sign = object.sign;
+    x.array = Array.from(object.array);
     x.normalize();
     return x;
   }
@@ -192,10 +201,8 @@
    *
    * `obj` is an object with one or more of the following properties,
    *
-   *   precision  {number}
-   *   rounding   {number}
-   *   toExpNeg   {number}
-   *   toExpPos   {number}
+   *   maxOps        {number}
+   *   serializeMode {string}
    *
    * E.g. OmegaExpantaNum.config({ precision: 20, rounding: 4 })
    *
