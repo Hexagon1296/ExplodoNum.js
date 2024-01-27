@@ -2,14 +2,15 @@
 
 ;(function(globalScope){
   // Editable defaults //
-  var OmegaExpantaNum = {
+  var ExplodoNum = {
     maxOps: 1000, // Maximum number of operations. When it is exceeded, the lowest priority operations are removed. Prevents long loops from eating memory and time.
     serializeMode: "auto" // Mode to use when converting from a JSON.
   //debug: 0
   },
     external = true,
-    omegaExpantaError = "[OENError]",
-    invalidArgument = `${omegaExpantaError} Invalid argument:`,
+    explodoNumError = "[ExplodoNumError]",
+    invalidArgument = `${explodoNumError} Invalid argument:`,
+    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+)?(J(\^+|\{[1-9]\d*\})|\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d*)*(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
     MAX_SAFE_INTEGER = 9007199254740991,
     MAX_E = Math.log10(MAX_SAFE_INTEGER),
     P = {},
@@ -18,7 +19,7 @@
 
   Q.fromNumber = function(number){
     if(typeof number!="number") throw Error(`${invalidArgument} Expected a number but instead got ${number}`);
-    let x = new OmegaExpantaNum();
+    let x = new ExplodoNum();
     x.array[0][1] = number;
     x.sign = number<0?-1:1;
     x.normalize();
@@ -41,7 +42,7 @@
 
   Q.fromBigInt = function(bigint){
     if(typeof bigint!="bigint") throw Error(`${invalidArgument} Expected a bigint but instead got ${bigint}`);
-    let x = new OmegaExpantaNum();
+    let x = new ExplodoNum();
     let abs = bigint<BigInt(0)?-bigint:bigint;
     x.sign = bigint<BigInt(0)?-1:1;
     if (abs<BigInt(MAX_SAFE_INTEGER)) x.array = [[0,Number(abs)]];
@@ -84,8 +85,8 @@
 
   Q.fromHyperE = function(hyperE){
     let packet = getHyperE(hyperE);
-    if(!Array.isArray(packet.argv)) return OmegaExpantaNum.fromNumber(packet.sign*packet.argv);
-    let x = new OmegaExpantaNum();
+    if(!Array.isArray(packet.argv)) return ExplodoNum.fromNumber(packet.sign*packet.argv);
+    let x = new ExplodoNum();
     for(let i = 0;i<packet.argv.length;i++){
       let arg = packet.argv[i];
       if(i>=2) arg--;
@@ -97,7 +98,7 @@
 
   Q.fromObject = function(object){
     if(typeof object!="object") throw Error(`${invalidArgument} Expected an object but instead got ${object}`);
-    let x = new OmegaExpantaNum();
+    let x = new ExplodoNum();
     x.layer = Array.from(object.layer);
     x.sign = object.sign;
     x.array = Array.from(object.array);
@@ -105,13 +106,23 @@
     return x;
   }
 
+  Q.fromString() = function(string){
+    if(typeof string!="string") throw Error(`${invalidArgument} Expected a string but instead got ${string}`);
+    try {
+      return ExplodoNum.fromJSON(JSON.parse(string));
+    } catch {
+      //Do nothing
+    }
+    
+  }
+
   //Begin ON/EN.js excerpt
   function clone(obj) {
     var i, p, ps;
-    function OmegaExpantaNum(input,input2) {
+    function ExplodoNum(input,input2) {
       var x=this;
-      if (!(x instanceof OmegaExpantaNum)) return new OmegaExpantaNum(input,input2);
-      x.constructor=OmegaExpantaNum;
+      if (!(x instanceof ExplodoNum)) return new ExplodoNum(input,input2);
+      x.constructor=ExplodoNum;
       var parsedObject=null;
       if (typeof input=="string"&&(input[0]=="["||input[0]=="{")){
         try {
@@ -122,23 +133,23 @@
       }
       var temp,temp2,temp3;
       if (typeof input=="number"&&!(input2 instanceof Array)){
-        temp=OmegaExpantaNum.fromNumber(input);
+        temp=ExplodoNum.fromNumber(input);
       }else if (typeof input=="bigint"){
-        temp=OmegaExpantaNum.fromBigInt(input);
+        temp=ExplodoNum.fromBigInt(input);
       }else if (parsedObject){
-        temp=OmegaExpantaNum.fromObject(parsedObject);
+        temp=ExplodoNum.fromObject(parsedObject);
       }else if (typeof input=="string"&&input[0]=="E"){
-        temp=OmegaExpantaNum.fromHyperE(input);
+        temp=ExplodoNum.fromHyperE(input);
       }else if (typeof input=="string"){
-        temp=OmegaExpantaNum.fromString(input);
+        temp=ExplodoNum.fromString(input);
       }else if (input instanceof Array||input2 instanceof Array){
-        temp=OmegaExpantaNum.fromArray(input,input2);
-      }else if (input instanceof OmegaExpantaNum){
+        temp=ExplodoNum.fromArray(input,input2);
+      }else if (input instanceof ExplodoNum){
         temp = Array.from(input.array);
         temp2 = input.sign;
         temp3 = Array.from(input.layer)
       }else if (typeof input=="object"){
-        temp=OmegaExpantaNum.fromObject(input);
+        temp=ExplodoNum.fromObject(input);
       }else{
         temp=[[0,NaN]];
         temp2=1;
@@ -155,15 +166,15 @@
       }
       return x;
     }
-    OmegaExpantaNum.prototype = P;
+    ExplodoNum.prototype = P;
 
-    OmegaExpantaNum.clone=clone;
-    OmegaExpantaNum.config=OmegaExpantaNum.set=config;
+    ExplodoNum.clone=clone;
+    ExplodoNum.config=ExplodoNum.set=config;
     
-    Object.assign(OmegaExpantaNum,Q);
+    Object.assign(ExplodoNum,Q);
   //for (var prop in Q){
   //  if (Q.hasOwnProperty(prop)){
-  //    OmegaExpantaNum[prop]=Q[prop];
+  //    ExplodoNum[prop]=Q[prop];
   //  }
   //}
     
@@ -173,9 +184,9 @@
       for (i = 0; i < ps.length;) if (!obj.hasOwnProperty(p = ps[i++])) obj[p] = this[p];
     }
 
-    OmegaExpantaNum.config(obj);
+    ExplodoNum.config(obj);
     
-    return OmegaExpantaNum;
+    return ExplodoNum;
   }
 
   function defineConstants(obj){
@@ -186,10 +197,10 @@
             configurable: false,
             enumerable: true,
             writable: false,
-            value: new OmegaExpantaNum(R[prop])
+            value: new ExplodoNum(R[prop])
           });
         }else{
-          obj[prop]=new OmegaExpantaNum(R[prop]);
+          obj[prop]=new ExplodoNum(R[prop]);
         }
       }
     }
@@ -197,19 +208,19 @@
   }
 
   /*
-   * Configure global settings for a OmegaExpantaNum constructor.
+   * Configure global settings for a ExplodoNum constructor.
    *
    * `obj` is an object with one or more of the following properties,
    *
    *   maxOps        {number}
    *   serializeMode {string}
    *
-   * E.g. OmegaExpantaNum.config({ precision: 20, rounding: 4 })
+   * E.g. ExplodoNum.config({ maxOps: 900, serializeMode: "string" })
    *
    */
   function config(obj){
     if (!obj||typeof obj!=='object') {
-      throw Error(omegaExpantaError+'Object expected');
+      throw Error(explodoNumError+'Object expected');
     }
     var i,p,v,
       ps = [
@@ -227,29 +238,29 @@
     return this;
   }
 
-  // Create and configure initial OmegaExpantaNum constructor.
-  OmegaExpantaNum=clone(OmegaExpantaNum);
+  // Create and configure initial ExplodoNum constructor.
+  ExplodoNum=clone(ExplodoNum);
 
-  OmegaExpantaNum=defineConstants(OmegaExpantaNum);
+  ExplodoNum=defineConstants(ExplodoNum);
 
-  OmegaExpantaNum['default']=OmegaExpantaNum.OmegaExpantaNum=OmegaExpantaNum;
+  ExplodoNum['default']=ExplodoNum.ExplodoNum=ExplodoNum;
 
   // Export.
 
   // AMD.
   if (typeof define == 'function' && define.amd) {
     define(function () {
-      return OmegaExpantaNum;
+      return ExplodoNum;
     });
   // Node and other environments that support module.exports.
   } else if (typeof module != 'undefined' && module.exports) {
-    module.exports = OmegaExpantaNum;
+    module.exports = ExplodoNum;
     // Browser.
   } else {
     if (!globalScope) {
       globalScope = typeof self != 'undefined' && self && self.self == self
         ? self : Function('return this')();
     }
-    globalScope.OmegaExpantaNum = globalScope.OEN = OmegaExpantaNum;
+    globalScope.ExplodoNum = globalScope.EXN = ExplodoNum;
   }
 })(this)
