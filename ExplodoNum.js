@@ -10,7 +10,7 @@
     external = true,
     explodoNumError = "[ExplodoNumError]",
     invalidArgument = `${explodoNumError} Invalid argument:`,
-    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(J(\^+|\{[1-9]\d*\})|\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
+    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(J+|(J(\^+|\{[1-9]\d*\})([1-9]\d* )?|\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d* |\(\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d*\)[1-9]\d* )*)?(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
     MAX_SAFE_INTEGER = 9007199254740991,
     MAX_E = Math.log10(MAX_SAFE_INTEGER),
     P = {},
@@ -106,7 +106,7 @@
     return x;
   }
 
-  Q.fromString() = function(string){
+  Q.fromString = function(string){
     if(typeof string!="string") throw Error(`${invalidArgument} Expected a string but instead got ${string}`);
     let isJSON = false;
     try {
@@ -117,8 +117,23 @@
     if(isJSON){
       return ExplodoNum.fromJSON(string);
     }
-    if
     let x = new ExplodoNum();
+  }
+
+  P.toString = function(){
+    let string = this.sign<0?"-":"";
+    let m = this.layer[0];
+    if(m>0){
+      if(m>3) string+="M^"+String(m)+" ";
+      else string+="M".repeat(m);
+    }
+    let layer = Array.from(this.layer).slice(1,-1).toReversed();
+    for(let j of layer){
+      let omegaArrow = "J";
+      if(j[0]<4) omegaArrow += "^".repeat(j[0]);
+      else omegaNum += "{"+String(j[0])+"}";
+      if(j[1]<3) string+=
+    }
   }
 
   //Begin OmegaNum.js/ExpantaNum.js excerpt
