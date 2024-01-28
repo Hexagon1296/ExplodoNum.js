@@ -10,7 +10,7 @@
     external = true,
     explodoNumError = "[ExplodoNumError]",
     invalidArgument = `${explodoNumError} Invalid argument:`,
-    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+)?(J(\^+|\{[1-9]\d*\})|\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d*)*(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
+    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(J(\^+|\{[1-9]\d*\})|\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
     MAX_SAFE_INTEGER = 9007199254740991,
     MAX_E = Math.log10(MAX_SAFE_INTEGER),
     P = {},
@@ -108,15 +108,20 @@
 
   Q.fromString() = function(string){
     if(typeof string!="string") throw Error(`${invalidArgument} Expected a string but instead got ${string}`);
+    let isJSON = false;
     try {
-      return ExplodoNum.fromJSON(JSON.parse(string));
-    } catch {
-      //Do nothing
+      return JSON.parse(string);
+    } finally {
+      isJSON = true;
     }
-    
+    if(isJSON){
+      return ExplodoNum.fromJSON(string);
+    }
+    if
+    let x = new ExplodoNum();
   }
 
-  //Begin ON/EN.js excerpt
+  //Begin OmegaNum.js/ExpantaNum.js excerpt
   function clone(obj) {
     var i, p, ps;
     function ExplodoNum(input,input2) {
