@@ -130,10 +130,19 @@
     let layer = Array.from(this.layer).slice(1,-1).toReversed();
     for(let j of layer){
       let omegaArrow = "J";
-      if(j[0]<4) omegaArrow += "^".repeat(j[0]);
-      else omegaNum += "{"+String(j[0])+"}";
-      if(j[1]<3) string+=
+      if(j[0]==1) omegaArrow = "J";
+      else if(j[0]<4) omegaArrow += "^".repeat(j[0]);
+      else omegaArrow += "{"+String(j[0])+"}";
+      if(j[0]==1){
+        let total = j[1]*(Boolean(j[2])?j[2]:1);
+        if(total<3) omegaArrow = omegaArrow.repeat(total);
+        else omegaArrow += "^"+String(total)+" ";
+      } else omegaArrow += "^"+String(j[1]);
+      if(j[0]==1) string += omegaArrow;
+      else if(j[2]<3) string += (omegaArrow+" ").repeat(j[2]);
+      else string += "("+omegaArrow+")^"+String(j[2])+" ";
     }
+    return string;
   }
 
   //Begin OmegaNum.js/ExpantaNum.js excerpt
