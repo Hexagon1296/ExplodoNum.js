@@ -49,7 +49,7 @@
       else if(set===1) this.layer.splice(index,0,[operator,value,1]);
       else this.layer.splice(index,0,[operator,2,value]);
     }
-    this.normalize();
+    //this.normalize();
   }
 
   Q.fromNumber = function(number){
@@ -57,7 +57,7 @@
     let x = new ExplodoNum();
     x.array[0][1] = number;
     x.sign = number<0?-1:1;
-    x.normalize();
+    //x.normalize();
     return x;
   }
 
@@ -88,7 +88,7 @@
     x.sign = bigint<BigInt(0)?-1:1;
     if (abs<BigInt(MAX_SAFE_INTEGER)) x.array = [[0,Number(abs)]];
     else x.array = [[0,BigIntLog10(abs)],[1,1]];
-    x.normalize();
+    //x.normalize();
     return x;
   }
 
@@ -133,7 +133,7 @@
       if(i>=2) arg--;
       x.array[i] = [i,arg];
     }
-    x.normalize();
+    //x.normalize();
     return x;
   }
 
@@ -143,7 +143,7 @@
     x.layer = deepCopy(object.layer);
     x.sign = object.sign;
     x.array = deepCopy(object.array);
-    x.normalize();
+    //x.normalize();
     return x;
   }
 
