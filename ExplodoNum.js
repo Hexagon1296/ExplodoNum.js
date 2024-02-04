@@ -21,6 +21,18 @@
     return Array.from(array, (e) => Array.isArray(e)?deepCopy(e):e);
   }
 
+  P.isFinite = function(){
+    return this.getOperator(0)!==Infinity&&!isNaN(this.getOperator(0));
+  }
+
+  P.isInfinite = function(){
+    return this.getOperator(0)===Infinity;
+  }
+
+  P.isNaN = function(){
+    return isNaN(this.getOperator(0))
+  }
+
   P.getOperatorIndex = function(isLayer,operator){
     let index;
     let list = isLayer?this.layer.slice(1).map((e)=>e[0]):this.array.map((e)=>e[0]);
@@ -205,6 +217,14 @@
     else if(operator1<10) string += "e".repeat(operator1)+String(operator0);
     else string += "(10^)^"+String(operator1)+" "+String(operator0);
     return string;
+  }
+
+  P.clone = function(){
+    let x = new ExplodoNum();
+    x.array = deepCopy(this.array);
+    x.sign = this.sign;
+    x.layer = deepCopy(this.layer);
+    return x;
   }
 
   //Begin OmegaNum.js/ExpantaNum.js excerpt
