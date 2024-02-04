@@ -10,12 +10,53 @@
     external = true,
     explodoNumError = "[ExplodoNumError]",
     invalidArgument = `${explodoNumError} Invalid argument:`,
-    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(J+|(J+|J(\^+|\{[1-9]\d*\})[1-9]\d* |\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d* |\(J(\^+|\{[1-9]\d*\})\)\^[1-9]\d*[1-9]\d* )*)?(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
+    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(J+|(J+|J(\^+|\{[1-9]\d*\})[1-9]\d* |\(J(\^+|\{[1-9]\d*\})[1-9]\d*\)\^[1-9]\d* )*)?(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
     MAX_SAFE_INTEGER = 9007199254740991,
     MAX_E = Math.log10(MAX_SAFE_INTEGER),
     P = {},
     Q = {},
     R = {};
+
+  function deepCopy(array){
+    return Array.from(array, (e) => Array.isArray(e)?deepCopy(e):e);
+  }
+
+  P.getOperatorIndex(isLayer,operator){
+    let index;
+    let list = isLayer?this.layer.slice(1).map((e)=>e[0]):this.array.map((e)=>e[0]);
+    index = list.indexOf(operator)+parseInt(isLayer);
+    if(index>=0) return index;
+    else return list.filter((e)=>e<operator).length-0.5+parseInt(isLayer);
+  }
+  
+  P.getOperator(get,operator){
+    let index = this.getOperatorIndex(get!==0,operator);
+    if(Number.isInteger(index)){
+      if(get===0) return this.array[index][1];
+      else return this.layer[index][get];
+    }
+    return get===0?(operator===0?10:0):0;
+  }
+
+  P.setOperator(set,operator,value){
+    let index = this.getOperatorIndex(set!==0,operator);
+    if(Number.isInteger(index)){
+      if(set===0) this.array[index][1] = value;
+      else this.layer[index][set] = value;
+    } else {
+      index = Math.ceil(index);
+      if(set===0) this.array.splice(index,0,[operator,value);
+      else if(set===1) this.layer.splice(index,0,[operator,value,1]);
+      else this.layer.splice(index,0,[operator,2,value]);
+    }
+    this.normalize();
+  }
+
+  P.valueOf = function(){
+    if(this.isInfinite()) return this.sign*Infinity;
+    if(this.isNaN()) return this.sign*NaN;
+    if(this.layer[0]>0) return this.sign*
+  }
 
   Q.fromNumber = function(number){
     if(typeof number!="number") throw Error(`${invalidArgument} Expected a number but instead got ${number}`);
@@ -99,9 +140,9 @@
   Q.fromObject = function(object){
     if(typeof object!="object") throw Error(`${invalidArgument} Expected an object but instead got ${object}`);
     let x = new ExplodoNum();
-    x.layer = Array.from(object.layer);
+    x.layer = deepCopy(object.layer);
     x.sign = object.sign;
-    x.array = Array.from(object.array);
+    x.array = deepCopy(object.array);
     x.normalize();
     return x;
   }
@@ -122,6 +163,8 @@
 
   P.toString = function(){
     let string = this.sign<0?"-":"";
+    if(this.isInfinite()) return string+"Infinity";
+    else if(this.isNaN()) return string+"NaN";
     let m = this.layer[0];
     if(m>0){
       if(m>3) string+="M^"+String(m)+" ";
@@ -134,14 +177,33 @@
       else if(j[0]<4) omegaArrow += "^".repeat(j[0]);
       else omegaArrow += "{"+String(j[0])+"}";
       if(j[0]==1){
-        let total = j[1]*(Boolean(j[2])?j[2]:1);
-        if(total<3) omegaArrow = omegaArrow.repeat(total);
+        let total = j[1]*(j[2]>0?j[2]:1);
+        if(total<4) omegaArrow = omegaArrow.repeat(total);
         else omegaArrow += "^"+String(total)+" ";
       } else omegaArrow += "^"+String(j[1]);
       if(j[0]==1) string += omegaArrow;
-      else if(j[2]<3) string += (omegaArrow+" ").repeat(j[2]);
+      else if(j[2]<4) string += (omegaArrow+" ").repeat(j[2]);
       else string += "("+omegaArrow+")^"+String(j[2])+" ";
     }
+    if(this.array.length>=3||this.array.length==2&&this.array[1][0]>=2){
+      let array = Array.from(this.layer).slice(0,-1).toReversed();
+      for(let arrow of array){
+        let natArrow = "10";
+        if(arrow[0]<4) natArrow += "^".repeat(arrow[0]);
+        else natArrow += "{"+String(arrow[0])"}";
+        if(arrow[1]>=4) string += "("+natArrow+")^"+String(arrow[1])+" ";
+        else if(arrow[1]>0) string += natArrow.repeat(arrow[1]);
+      }
+    }
+    let operator0 = this.getOperator(0,0);
+    let operator1 = this.getOperator(0,1);
+    if(operator1<=0) string += String(operator0);
+    else if(operator1==1) string += String(10**(operator%1))+"e"+String(operator0);
+    else if(operator1==2) string += String(10**((10**(operator%1))%1))+"e"+String(10**(operator%1))+"e"+String(operator0);
+    else if(operator1==3) string += "e"+String(10**((10**(operator%1))%1))+"e"+String(10**(operator%1))+"e"+String(operator0);
+    else if(operator1<5) string += "e".repeat(operator1-1)+String(10**(operator%1))+"e"+String(operator0);
+    else if(operator1<10) string += "e".repeat(operator1)+String(operator0);
+    else string += "(10^)^"+String(operator1)+" "+String(operator0);
     return string;
   }
 
@@ -174,9 +236,9 @@
       }else if (input instanceof Array||input2 instanceof Array){
         temp=ExplodoNum.fromArray(input,input2);
       }else if (input instanceof ExplodoNum){
-        temp = Array.from(input.array);
+        temp = deepCopy(input.array);
         temp2 = input.sign;
-        temp3 = Array.from(input.layer)
+        temp3 = deepCopy(input.layer)
       }else if (typeof input=="object"){
         temp=ExplodoNum.fromObject(input);
       }else{
@@ -249,7 +311,7 @@
    */
   function config(obj){
     if (!obj||typeof obj!=='object') {
-      throw Error(explodoNumError+'Object expected');
+      throw Error(explodoNumError+' Object expected');
     }
     var i,p,v,
       ps = [
