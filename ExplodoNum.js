@@ -21,7 +21,7 @@
     return Array.from(array, (e) => Array.isArray(e)?deepCopy(e):e);
   }
 
-  P.getOperatorIndex(isLayer,operator){
+  P.getOperatorIndex = function(isLayer,operator){
     let index;
     let list = isLayer?this.layer.slice(1).map((e)=>e[0]):this.array.map((e)=>e[0]);
     index = list.indexOf(operator)+parseInt(isLayer);
@@ -29,7 +29,7 @@
     else return list.filter((e)=>e<operator).length-0.5+parseInt(isLayer);
   }
   
-  P.getOperator(get,operator){
+  P.getOperator = function(get,operator){
     let index = this.getOperatorIndex(get!==0,operator);
     if(Number.isInteger(index)){
       if(get===0) return this.array[index][1];
@@ -38,14 +38,14 @@
     return get===0?(operator===0?10:0):0;
   }
 
-  P.setOperator(set,operator,value){
+  P.setOperator = function(set,operator,value){
     let index = this.getOperatorIndex(set!==0,operator);
     if(Number.isInteger(index)){
       if(set===0) this.array[index][1] = value;
       else this.layer[index][set] = value;
     } else {
       index = Math.ceil(index);
-      if(set===0) this.array.splice(index,0,[operator,value);
+      if(set===0) this.array.splice(index,0,[operator,value]);
       else if(set===1) this.layer.splice(index,0,[operator,value,1]);
       else this.layer.splice(index,0,[operator,2,value]);
     }
@@ -190,7 +190,7 @@
       for(let arrow of array){
         let natArrow = "10";
         if(arrow[0]<4) natArrow += "^".repeat(arrow[0]);
-        else natArrow += "{"+String(arrow[0])"}";
+        else natArrow += "{"+String(arrow[0])+"}";
         if(arrow[1]>=4) string += "("+natArrow+")^"+String(arrow[1])+" ";
         else if(arrow[1]>0) string += natArrow.repeat(arrow[1]);
       }
