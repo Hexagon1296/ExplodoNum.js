@@ -62,9 +62,8 @@
   }
 
   P.toNumber = function(){
-    if (this.array.length>=2&&(this.array[1][0]>=2||this.array[1][1]>=3||this.array[1][1]==1&&this.array[0][1]>Math.log10(Number.MAX_VALUE)||this.array[1][1]==3&&this.array[0][1]>Math.log10(Math.log10(Number.MAX_VALUE)))) return this.sign*Infinity;
+    if (this.array.length>=2&&(this.array[1][0]>=2||this.array[1][1]>=2||this.array[1][1]==1&&this.array[0][1]>Math.log10(Number.MAX_VALUE)||this.array[1][1]==3&&this.array[0][1]>Math.log10(Math.log10(Number.MAX_VALUE)))) return this.sign*Infinity;
     if (this.array.length>=2&&this.array[1][1]==1) return this.sign*10**this.array[0][1];
-    if (this.array.length>=2&&this.array[1][1]==2) return this.sign*10**(10**this.array[0][1]);
     return this.sign*this.array[0][1];
   }
 
