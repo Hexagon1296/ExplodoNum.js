@@ -22,23 +22,23 @@
   }
 
   P.isFinite = function(){
-    return this.getOperator(0)!==Infinity&&!isNaN(this.getOperator(0));
+    return this.getOperator(0,0)!==Infinity&&!isNaN(this.getOperator(0,0));
   }
 
   P.isInfinite = function(){
-    return this.getOperator(0)===Infinity;
+    return this.getOperator(0,0)===Infinity;
   }
 
   P.isNaN = function(){
-    return isNaN(this.getOperator(0))
+    return isNaN(this.getOperator(0,0))
   }
 
   P.getOperatorIndex = function(isLayer,operator){
     let index;
     let list = isLayer?this.layer.slice(1).map((e)=>e[0]):this.array.map((e)=>e[0]);
-    index = list.indexOf(operator)+parseInt(isLayer);
+    index = list.indexOf(operator)+isLayer;
     if(index>=0) return index;
-    else return list.filter((e)=>e<operator).length-0.5+parseInt(isLayer);
+    else return list.filter((e)=>e<operator).length-0.5+isLayer;
   }
   
   P.getOperator = function(get,operator){
@@ -182,20 +182,22 @@
       if(m>3) string+="M^"+String(m)+" ";
       else string+="M".repeat(m);
     }
-    let layer = Array.from(this.layer).slice(1,-1).toReversed();
-    for(let j of layer){
-      let omegaArrow = "J";
-      if(j[0]==1) omegaArrow = "J";
-      else if(j[0]<4) omegaArrow += "^".repeat(j[0]);
-      else omegaArrow += "{"+String(j[0])+"}";
-      if(j[0]==1){
-        let total = j[1]*(j[2]>0?j[2]:1);
-        if(total<4) omegaArrow = omegaArrow.repeat(total);
-        else omegaArrow += "^"+String(total)+" ";
-      } else omegaArrow += "^"+String(j[1]);
-      if(j[0]==1) string += omegaArrow;
-      else if(j[2]<4) string += (omegaArrow+" ").repeat(j[2]);
-      else string += "("+omegaArrow+")^"+String(j[2])+" ";
+    if(this.layer.length>=2){
+    let layer = Array.from(this.layer).slice(1).toReversed();
+      for(let j of layer){
+        let omegaArrow = "J";
+        if(j[0]==1) omegaArrow = "J";
+        else if(j[0]<4) omegaArrow += "^".repeat(j[0]);
+        else omegaArrow += "{"+String(j[0])+"}";
+        if(j[0]==1){
+          let total = j[1]*(j[2]>0?j[2]:1);
+          if(total<4) omegaArrow = omegaArrow.repeat(total);
+          else omegaArrow += "^"+String(total)+" ";
+        } else omegaArrow += "^"+String(j[1]);
+        if(j[0]==1) string += omegaArrow;
+        else if(j[2]<4) string += (omegaArrow+" ").repeat(j[2]);
+        else string += "("+omegaArrow+")^"+String(j[2])+" ";
+      }
     }
     if(this.array.length>=3||this.array.length==2&&this.array[1][0]>=2){
       let array = Array.from(this.layer).slice(0,-1).toReversed();
