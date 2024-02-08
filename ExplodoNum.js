@@ -183,7 +183,7 @@
       else string+="M".repeat(m);
     }
     if(this.layer.length>=2){
-    let layer = Array.from(this.layer).slice(1).toReversed();
+      let layer = Array.from(this.layer).slice(1).reverse();
       for(let j of layer){
         let omegaArrow = "J";
         if(j[0]==1) omegaArrow = "J";
@@ -200,7 +200,7 @@
       }
     }
     if(this.array.length>=3||this.array.length==2&&this.array[1][0]>=2){
-      let array = Array.from(this.layer).slice(0,-1).toReversed();
+      let array = Array.from(this.layer).slice(2-parseInt(this.array.length==2)).reverse();
       for(let arrow of array){
         let natArrow = "10";
         if(arrow[0]<4) natArrow += "^".repeat(arrow[0]);
@@ -212,10 +212,10 @@
     let operator0 = this.getOperator(0,0);
     let operator1 = this.getOperator(0,1);
     if(operator1<=0) string += String(operator0);
-    else if(operator1==1) string += String(10**(operator%1))+"e"+String(operator0);
-    else if(operator1==2) string += String(10**((10**(operator%1))%1))+"e"+String(10**(operator%1))+"e"+String(operator0);
-    else if(operator1==3) string += "e"+String(10**((10**(operator%1))%1))+"e"+String(10**(operator%1))+"e"+String(operator0);
-    else if(operator1<5) string += "e".repeat(operator1-1)+String(10**(operator%1))+"e"+String(operator0);
+    else if(operator1==1) string += String(10**(operator0%1))+"e"+String(Math.floor(operator0));
+    else if(operator1==2) string += String(10**((10**(operator0%1))%1))+"e"+String(10**(operator0%1))+"e"+String(Math.floor(operator0));
+    else if(operator1==3) string += "e"+String(10**((10**(operator0%1))%1))+"e"+String(10**(operator0%1))+"e"+String(Math.floor(operator0));
+    else if(operator1<5) string += "e".repeat(operator1-1)+String(10**(operator0%1))+"e"+String(Math.floor(operator0));
     else if(operator1<10) string += "e".repeat(operator1)+String(operator0);
     else string += "(10^)^"+String(operator1)+" "+String(operator0);
     return string;
