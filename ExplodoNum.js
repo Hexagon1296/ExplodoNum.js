@@ -37,7 +37,7 @@
     let index;
     let list = isLayer?this.layer.slice(1).map((e)=>e[0]):this.array.map((e)=>e[0]);
     index = list.indexOf(operator)+isLayer;
-    if(index>=0) return index;
+    if(index>=isLayer) return index;
     else return list.filter((e)=>e<operator).length-0.5+isLayer;
   }
   
@@ -158,19 +158,218 @@
     //x.normalize();
     return x;
   }
+  
+  var LONG_STRING_MIN_LENGTH=17;
+  var log10LongString=function log10LongString(str){
+    return Math.log10(Number(str.substring(0,LONG_STRING_MIN_LENGTH)))+(str.length-LONG_STRING_MIN_LENGTH);
+  }
 
   Q.fromString = function(string){
     if(typeof string!="string") throw Error(`${invalidArgument} Expected a string but instead got ${string}`);
     let isJSON = false;
-    try {
-      return JSON.parse(string);
-    } finally {
-      isJSON = true;
+    if (typeof string=="string"&&(string[0]=="["||string[0]=="{")){
+      try {
+        JSON.parse(string);
+      }finally{
+        isJSON=true;
+      }
     }
     if(isJSON){
       return ExplodoNum.fromJSON(string);
     }
     let x = new ExplodoNum();
+    //ExpantaNum.js excerpt
+    var negateIt=false;
+    if (string[0]=="-"||string[0]=="+"){
+      var numSigns=string.search(/[^-\+]/);
+      var signs=string.substring(0,numSigns);
+      negateIt=signs.match(/-/g).length%2==1;
+      string=string.substring(numSigns);
+    }
+    x.sign = Number(negateIt)*2-1
+    if (string=="NaN"){
+      x.array=[[0,NaN]];
+      return x;
+    }
+    else if (string=="Infinity"){
+      x.array=[[0,Infinity]];
+      return x;
+    }
+    else{
+      var a,b,c,d,e,i;
+      if (string[0]=="M"){
+        if (string[1]=="^"){
+          a=string.substring(2).search(/[^0-9]/)+2;
+          x.layer=Number(string.substring(2,a));
+          string=string.substring(a+1);
+        }else{
+          a=string.search(/[^M]/);
+          x.layer[0]=a;
+          string=string.substring(a);
+        }
+      }
+      while (string){
+        if (string.includes("J")){
+          if (string[0]=="("){
+            string=string.substring(1);
+          }
+          let arrows;
+          e = 0
+          if(/\d/.test(string[1])){
+            arrows = 1;
+            b = 1;
+            e = 1;
+          } else if (string[1]=="J"){
+            a=string.substring(1).search(/[^\^]/);
+            e=a;
+            arrows = 1;
+            b=a+1;
+          } else if (string[1]=="^"){
+            a=string.substring(1).search(/[^\^]/);
+            arrows=a;
+            b=a+1;
+          }else{
+            a=string.indexOf("}");
+            arrows=Number(string.substring(2,a));
+            b=a;
+          }
+          string=string.substring(b);
+          c = string.search(/[\) ]/);
+          d = string.substring(0,c)
+          if(e===0) b = parseInt(d);
+          else b = e;
+          if (string[0]==")"){
+            a=string.indexOf(" ");
+            c=Number(string.substring(2,a));
+            string=string.substring(a+1);
+          }else{
+            c=1;
+          }
+          if (arrows==1){
+            if (x.layer.length>=3&&x.layer[1][0]==1){
+              x.layer[1][2]+=c;
+            }else{
+              x.layer.splice(1,0,[1,b,c]);
+            }
+          }else if (arrows==2){
+            if (x.layer.length>=2&&x.layer[1][0]==1) x.layer.splice(1,1);
+            d=x.getOperatorIndex(true,2);
+            if (Number.isInteger(d)) x.layer[d][2]+=c;
+            else x.layer.splice(Math.ceil(d),0,[2,b,c]);
+          }else{
+            d=x.getOperatorIndex(true,arrows);
+            x.layer.splice(1,Math.ceil(d)-1);
+            if (Number.isInteger(d)) x.layer[1][2]+=c;
+            else x.layer.splice(1,0,[arrows,b,c]);
+          }
+        }else{
+          break;
+        }
+      }
+      while (string){
+        if (/^\(?10[\^\{]/.test(string)){
+          if (string[0]=="("){
+            string=string.substring(1);
+          }
+          var arrows;
+          if (string[2]=="^"){
+            a=string.substring(2).search(/[^\^]/);
+            arrows=a;
+            b=a+2;
+          }else{
+            a=string.indexOf("}");
+            arrows=Number(string.substring(3,a));
+            b=a+1;
+          }
+          string=string.substring(b);
+          if (string[0]==")"){
+            a=string.indexOf(" ");
+            c=Number(string.substring(2,a));
+            string=string.substring(a+1);
+          }else{
+            c=1;
+          }
+          if (arrows==1){
+            if (x.array.length>=2&&x.array[1][0]==1){
+              x.array[1][1]+=c;
+            }else{
+              x.array.splice(1,0,[1,c]);
+            }
+          }else if (arrows==2){
+            a=x.array.length>=2&&x.array[1][0]==1?x.array[1][1]:0;
+            b=x.array[0][1];
+            if (b>=1e10) ++a;
+            if (b>=10) ++a;
+            x.array[0][1]=a;
+            if (x.array.length>=2&&x.array[1][0]==1) x.array.splice(1,1);
+            d=x.getOperatorIndex(false,2);
+            if (Number.isInteger(d)) x.array[d][1]+=c;
+            else x.array.splice(Math.ceil(d),0,[2,c]);
+          }else{
+            a=x.getOperator(0,arrows-1);
+            b=x.getOperator(0,arrows-2);
+            if (b>=10) ++a;
+            d=x.getOperatorIndex(false,arrows);
+            x.array.splice(1,Math.ceil(d)-1);
+            x.array[0][1]=a;
+            if (Number.isInteger(d)) x.array[1][1]+=c;
+            else x.array.splice(1,0,[arrows,c]);
+          }
+        }else{
+          break;
+        }
+      }
+      a=string.split(/[Ee]/);
+      b=[x.array[0][1],0];
+      c=1;
+      for (i=a.length-1;i>=0;--i){
+        //The things that are already there
+        if (b[0]<MAX_E&&b[1]===0){
+          b[0]=Math.pow(10,c*b[0]);
+        }else if (c==-1){
+          if (b[1]===0){
+            b[0]=Math.pow(10,c*b[0]);
+          }else if (b[1]==1&&b[0]<=Math.log10(Number.MAX_VALUE)){
+            b[0]=Math.pow(10,c*Math.pow(10,b[0]));
+          }else{
+            b[0]=0;
+          }
+          b[1]=0;
+        }else{
+          b[1]++;
+        }
+        //Multiplying coefficient
+        var decimalPointPos=a[i].indexOf(".");
+        var intPartLen=decimalPointPos==-1?a[i].length:decimalPointPos;
+        if (b[1]===0){
+          if (intPartLen>=LONG_STRING_MIN_LENGTH) b[0]=Math.log10(b[0])+log10LongString(a[i].substring(0,intPartLen)),b[1]=1;
+          else if (a[i]) b[0]*=Number(a[i]);
+        }else{
+          d=intPartLen>=LONG_STRING_MIN_LENGTH?log10LongString(a[i].substring(0,intPartLen)):a[i]?Math.log10(Number(a[i])):0;
+          if (b[1]==1){
+            b[0]+=d;
+          }else if (b[1]==2&&b[0]<MAX_E+Math.log10(d)){
+            b[0]+=Math.log10(1+Math.pow(10,Math.log10(d)-b[0]));
+          }
+        }
+        //Carrying
+        if (b[0]<MAX_E&&b[1]){
+          b[0]=Math.pow(10,b[0]);
+          b[1]--;
+        }else if (b[0]>MAX_SAFE_INTEGER){
+          b[0]=Math.log10(b[0]);
+          b[1]++;
+        }
+      }
+      x.array[0][1]=b[0];
+      if (b[1]){
+        if (x.array.length>=2&&x.array[1][0]==1) x.array[1][1]+=b[1];
+        else x.array.splice(1,0,[1,b[1]]);
+      }
+    }
+    if (negateIt) x.sign*=-1;
+    //x.normalize();
+    return x;
   }
 
   P.toString = function(){
