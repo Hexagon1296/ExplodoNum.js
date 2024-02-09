@@ -17,8 +17,184 @@
     Q = {},
     R = {};
 
+  R.ZERO = 0;
+  R.ONE = 1;
+
   function deepCopy(array){
     return Array.from(array, (e) => Array.isArray(e)?deepCopy(e):e);
+  }
+
+  P.absoluteValue = P.abs = function(){
+    let x = this.clone();
+    x.sign = 1;
+    return x;
+  }
+
+  Q.absoluteValue = Q.abs = function(x){
+    return new ExplodoNum(x).abs();
+  }
+
+  P.negate = P.neg = function(){
+    let x = this.clone();
+    x.sign *= -1;
+    return x;
+  }
+
+  Q.negate = Q.neg = function(x){
+    return new ExplodoNum(x).neg();
+  }
+
+  P.compareTo = P.cmp = function(other){
+    if(!(other instanceof ExplodoNum)) other = new ExplodoNum(other);
+    if(this.isNaN()||other.isNaN()) return NaN;
+    if(this.isInfinite()&&other.isInfinite()) return NaN;
+    if(this.isInfinite()&&other.isFinite()) return this.sign;
+    if(this.isFinite()&&other.isInfinite()) return -other.sign;
+    if (this.array.length==1&&this.array[0][1]===0&&other.array.length==1&&other.array[0][1]===0) return 0;
+    if(this.sign!==other.sign) return this.sign;
+    var m=this.sign;
+    var r;
+    //ExpantaNum.js excerpt
+    if (this.layer[0]>other.layer[0]) r=1;
+    else if (this.layer[0]<other.layer[0]) r=-1;
+    else{
+      var e,f;
+      for (var i=0,l=Math.min(this.layer.length,other.layer.length);i<l;++i){
+        e=this.layer[this.layer.length-1-i];
+        f=other.layer[other.layer.length-1-i];
+        if (e[0]>f[0]||e[0]==f[0]&&e[1]>f[1]||e[0]==f[0]&&e[1]==f[1]&&e[2]>f[2]){
+          r=1;
+          break;
+        }else if (e[0]<f[0]||e[0]==f[0]&&e[1]<f[1]||e[0]==f[0]&&e[1]==f[1]&&e[2]<f[2]){
+          r=-1;
+          break;
+        }
+      }
+      if(r!==undefined) return r*m;
+      for (var i=0,l=Math.min(this.array.length,other.array.length);i<l;++i){
+        e=this.array[this.array.length-1-i];
+        f=other.array[other.array.length-1-i];
+        if (e[0]>f[0]||e[0]==f[0]&&e[1]>f[1]){
+          r=1;
+          break;
+        }else if (e[0]<f[0]||e[0]==f[0]&&e[1]<f[1]){
+          r=-1;
+          break;
+        }
+      }
+      if (r===undefined){
+        if (this.array.length==other.array.length){
+          r=0;
+        }else if (this.array.length>other.array.length){
+          e=this.array[this.array.length-l];
+          if (e[0]>=1||e[1]>10){
+            r=1;
+          }else{
+            r=-1;
+          }
+        }else{
+          e=other.array[other.array.length-l];
+          if (e[0]>=1||e[1]>10){
+            r=-1;
+          }else{
+            r=1;
+          }
+        }
+      }
+    }
+    return r*m;
+  }
+
+  Q.compareTo = Q.cmp = function(x,y){
+    return new ExplodoNum(x).cmp(y);
+  }
+
+  P.lessThan = P.lt = function(other){
+    return this.cmp(other)<0
+  }
+
+  Q.lessThan = Q.lt = function(x,y){
+    return new ExplodoNum(x).lt(y);
+  }
+
+  P.lessThanOrEqualTo = P.lte = function(other){
+    return this.cmp(other)<=0
+  }
+
+  Q.lessThanOrEqualTo = Q.lte = function(x,y){
+    return new ExplodoNum(x).lte(y);
+  }
+
+  P.greaterThan = P.gt = function(other){
+    return this.cmp(other)>0
+  }
+
+  Q.greaterThan = Q.gt = function(x,y){
+    return new ExplodoNum(x).gt(y);
+  }
+
+  P.greaterThanOrEqualTo = P.gte = function(other){
+    return this.cmp(other)>=0
+  }
+
+  Q.greaterThanOrEqualTo = Q.gte = function(x,y){
+    return new ExplodoNum(x).gte(y);
+  }
+
+  P.equalTo = P.eq = function(other){
+    return this.cmp(other)===0
+  }
+
+  Q.equalTo = Q.eq = function(x,y){
+    return new ExplodoNum(x).eq(y);
+  }
+
+  P.notEqualTo = P.neq = function(other){
+    return this.cmp(other)!==0
+  }
+
+  Q.notEqualTo = Q.neq = function(x,y){
+    return new ExplodoNum(x).neq(y);
+  }
+  
+  P.minimum = P.min = function(...y){
+    if(y.length===0) return this.clone();
+    else{
+      let min = ExplodoNum.min(...y);
+      return this.lt(min)?this.clone():min.clone();
+    }
+  }
+
+  Q.minimum = Q.min = function(x,...y) {
+    return new ExpantaNum(x).min(...y);
+  }
+  
+  P.maximum = P.max = function(...y){
+    if(y.length===0) return this.clone();
+    else{
+      let max = ExplodoNum.max(...y);
+      return this.gt(min)?this.clone():max.clone();
+    }
+  }
+
+  Q.maximum = Q.max = function(x,...y) {
+    return new ExpantaNum(x).max(...y);
+  }
+
+  P.isPositive = P.ispos = function(){
+    return this.gt(ExplodoNum.ZERO);
+  }
+
+  Q.isPositive = Q.ispos = function(x){
+    return new ExplodoNum(x).isPositive();
+  }
+
+  P.isNegative = P.isneg = function(){
+    return this.lt(ExplodoNum.ZERO);
+  }
+
+  Q.isNegative = Q.isneg = function(x){
+    return new ExplodoNum(x).isNegative();
   }
 
   P.isFinite = function(){
@@ -26,7 +202,7 @@
   }
 
   Q.isFinite = function(x){
-    return ExplodoNum(x).isFinite();
+    return new ExplodoNum(x).isFinite();
   }
 
   P.isInfinite = function(){
@@ -34,7 +210,7 @@
   }
   
   Q.isInfinite = function(x){
-    return ExplodoNum(x).isInfinite();
+    return new ExplodoNum(x).isInfinite();
   }
 
   P.isNaN = function(){
@@ -42,17 +218,17 @@
   }
   
   Q.isNaN = function(x){
-    return ExplodoNum(x).isNaN();
+    return new ExplodoNum(x).isNaN();
   }
 
-  P.isInteger = function(){
+  P.isInteger = P.isint = function(){
     if(this.isInfinite()) return true;
     if(this.isNaN()) return false;
     return Number.isInteger(this.toNumber());
   }
   
-  Q.isInteger = function(x){
-    return ExplodoNum(x).isInteger();
+  Q.isInteger = Q.isint = function(x){
+    return new ExplodoNum(x).isInteger();
   }
 
   P.getOperatorIndex = function(isLayer,operator){
@@ -208,7 +384,8 @@
       negateIt=signs.match(/-/g).length%2==1;
       string=string.substring(numSigns);
     }
-    x.sign = Number(negateIt)*2-1
+    x.array = [[0,0]];
+    x.sign = Number(!negateIt)*2-1
     if (string=="NaN"){
       x.array=[[0,NaN]];
       return x;
@@ -242,8 +419,8 @@
             b = 1;
             e = 1;
           } else if (string[1]=="J"){
-            a=string.substring(1).search(/[^\^]/);
-            e=a;
+            a=string.substring(1).search(/[^J]/);
+            e=a+1;
             arrows = 1;
             b=a+1;
           } else if (string[1]=="^"){
@@ -258,8 +435,10 @@
           string=string.substring(b);
           c = string.search(/[\) ]/);
           d = string.substring(0,c)
-          if(e===0) b = parseInt(d);
-          else b = e;
+          if(e===0){
+            b = parseInt(d);
+            string = string.substring(c)
+          } else b = e;
           if (string[0]==")"){
             a=string.indexOf(" ");
             c=Number(string.substring(2,a));
@@ -412,7 +591,7 @@
       for(let j of layer){
         let omegaArrow = "J";
         if(j[0]==1) omegaArrow = "J";
-        else if(j[0]<4) omegaArrow += "^".repeat(j[0]);
+        else if(j[0]<4) omegaArrow += "^".repeat(j[0]-1);
         else omegaArrow += "{"+String(j[0])+"}";
         if(j[0]==1){
           let total = j[1]*(j[2]>0?j[2]:1);
