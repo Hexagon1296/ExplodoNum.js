@@ -8,7 +8,7 @@ Internally, it is represented as a sign and two arrays, one simply called array 
 - ...(10{a<sub>3</sub>})<sup>b<sub>3</sub></sup>(10{a<sub>2</sub>})<sup>b<sub>2</sub></sup>(10{a<sub>1</sub>})<sup>b<sub>1</sub></sup>b<sub>0</sub> if a<sub>0</sub> = 0
 - ...(10{a<sub>3</sub>})<sup>b<sub>3</sub></sup>(10{a<sub>2</sub>})<sup>b<sub>2</sub></sup>(10{a<sub>1</sub>})<sup>b<sub>1</sub></sup>(10{a<sub>0</sub>})<sup>b<sub>0</sub></sup>10 otherwise
 
-If you are not planning to make something to the scale of (True Infinity)[https://reinhardt-c.github.io/TrueInfinity], then use other libraries, such as, in ascending order:
+If you are not planning to make something to the scale of [True Infinity](https://reinhardt-c.github.io/TrueInfinity), then use other libraries, such as, in ascending order:
 
 - [break_infinity.js](https://github.com/Patashu/break_infinity.js) by Patashu - e9e15
 - [decimal.js](https://github.com/MikeMcl/decimal.js) by MikeMcl - e9e15
@@ -17,7 +17,7 @@ If you are not planning to make something to the scale of (True Infinity)[https:
 - [magna_numerus.js](https://github.com/aarextiaokhiao/magna_numerus.js/blob/master/magna_numerus.js) by Aarex Tiaokhiao - ?
 - [break_eternity.js](https://github.com/Patashu/break_eternity.js) by Patashu - 10^^1.8e308
 - [OmegaNum.js](https://github.com/Naruyoko/OmegaNum.js) by Naruyoko - 10{1000}10 (default)
-- [ExpantaNum.js](https://github.com/Naruyoko/ExpantaNum.js/)https://github.com/Naruyoko/ExpantaNum.js/ by Naruyoko - {10,9e15,1,2}
+- [ExpantaNum.js](https://github.com/Naruyoko/ExpantaNum.js/) by Naruyoko - {10,9e15,1,2}
 
 Furthur ideas:
 
