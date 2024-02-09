@@ -25,12 +25,34 @@
     return this.getOperator(0,0)!==Infinity&&!isNaN(this.getOperator(0,0));
   }
 
+  Q.isFinite = function(x){
+    return ExplodoNum(x).isFinite();
+  }
+
   P.isInfinite = function(){
     return this.getOperator(0,0)===Infinity;
+  }
+  
+  Q.isInfinite = function(x){
+    return ExplodoNum(x).isInfinite();
   }
 
   P.isNaN = function(){
     return isNaN(this.getOperator(0,0))
+  }
+  
+  Q.isNaN = function(x){
+    return ExplodoNum(x).isNaN();
+  }
+
+  P.isInteger = function(){
+    if(this.isInfinite()) return true;
+    if(this.isNaN()) return false;
+    return Number.isInteger(this.toNumber());
+  }
+  
+  Q.isInteger = function(x){
+    return ExplodoNum(x).isInteger();
   }
 
   P.getOperatorIndex = function(isLayer,operator){
@@ -254,13 +276,17 @@
           }else if (arrows==2){
             if (x.layer.length>=2&&x.layer[1][0]==1) x.layer.splice(1,1);
             d=x.getOperatorIndex(true,2);
-            if (Number.isInteger(d)) x.layer[d][2]+=c;
-            else x.layer.splice(Math.ceil(d),0,[2,b,c]);
+            if (Number.isInteger(d)){
+              x.layer[d][2]+=c
+              if(b>x.layer[d][1]) x.layer[d][1] = b;
+            } else x.layer.splice(Math.ceil(d),0,[2,b,c]);
           }else{
             d=x.getOperatorIndex(true,arrows);
             x.layer.splice(1,Math.ceil(d)-1);
-            if (Number.isInteger(d)) x.layer[1][2]+=c;
-            else x.layer.splice(1,0,[arrows,b,c]);
+            if (Number.isInteger(d)){
+              x.layer[1][2]+=c;
+              if(b>x.layer[1][1]) x.layer[1][1] = b;
+            } else x.layer.splice(1,0,[arrows,b,c]);
           }
         }else{
           break;
