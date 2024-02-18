@@ -22,7 +22,7 @@
             <li><a href="#n.hyperoperations">Hyperoperations</a></li>
             <li><a href="#n.condenserepetitions">Condensing repetitions</a></li>
             <li><a href="#n.j">J</a></li>
-            <li><a href="#n.joperators">J with hyperoperators</a></li>
+            <li><a href="#n.jrepetition">Applying repetition to J</a></li>
             <li><a href="#n.m">M</a></li>
           </ul>
         </li>
@@ -71,23 +71,19 @@
       Using arrows, large numbers such as 10{16}(10{12})^51 (10^^^)^6 eeee104 can be easily written, and numbers not talked about here are relatively close to other numbers, thus is discarded. However, we hit a limit; the notation is strongest if we increase the n in 10{n}10 as if it were a variable. No worries, we can just put numbers with hyperoperators as the number of arrows! Well, we will get some problems. We will get something like 10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10{10^^^(10^^)^520 ee500}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10}10. It is very hard on eyes, and very large in comparison, defeating the purpose of notation numbers in the first place. It also takes a lot of space as text, and it takes so long to write it by hand. I only put this because I could make the computer repeat pieces of text set amount of times. Worst of all, to compare which number are larger, you need to count each individual layers, and that is impractical. There must be a better way to handle such large numbers, right?<br>
       Luckily, there is! Function f(x)=10{x}10 is written as Jx. This is defined as <a href="https://googology.wikia.org/wiki/User_blog:PsiCubed2/My_Letter_Notation">a part of PsiCubed2's letter notation</a>. In addition, we can treat <i>this</i> as another operation, this time unary, but we always treated 10{n}x as unary operation "10{n}", so no worries. So, we can now see the above number clearly, written J^45 10^^^(10^^)^520 ee500.
     </p>
-    <h3 id="n.joperators">J with hyperoperators</h3>
+    <h3 id="n.jrepetition">Applying repetition to J</h3>
     <p>
       J is a fast growing operator. Using it, it is possible to write some really large numbers like J^183 (10{52})^31 (10{32})^7312 (10{12})^51 (10^^^^)^8 eeeee5.891341e243 easily, and not take up much space. But eventually, the powers of J will themselves become numbers with hyperoperators, and suddenly we are back to where we started when we created J.<br/>
-      Well, you can fix that, too. By adding hyperoperators to J. Wait, what does f^^5(x) even mean? Well, lets start with that: f^^n.<br/>
-      If you recall back 2 hours ago about how tetration is defined, we can do the same thing here. We will define a function g(x) as the repetition of J, being 10{10{10{10{...{10}...}10}10}10}10, with x 10's from the center out. Now we can define J^^5 x: it is equivilent to g^5(x). Generally, J^^n x is g^n(x).<br/>
-      It may seem confusing for J^^1 to not be the same as J. If you were to look back, however, g(x) is J^x 1. Back in PsiCubed2's letter notation, this is K. Then, the next repetition is L<br/>
-      From there on, this is written as (1,n)|x, where n is the number of times J is recursed. This is another part of the notation.
+      Well, you can fix that, too. By defining a repetition of J, just like the hyperoperators with exponentiation..<br/>
+      We will define a function g(x) as the repetition of J, being 10{10{10{10{...{10}...}10}10}10}10, with x 10's from the center out.<br/>
+      This may seem familiar if you know the Bowerism hyperoperators: this is actually just 10 expanded to the x, written 10{{1}}x.<br/>
+      We can do the same with the hyperoperators as before. Define 10{{2}}x as 10{{1}}10{{1}}10{{1}}...{{1}}10{{1}}10 with x 10's, etc.
     </p>
     <h3 id="n.m">M</h3>
     <p>
-      Now we will be back to what made us create J in the first place. Eventually, we will be writing numbers like (1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,(1,20)|(1,20)|((1,12)|)^51 L^5 10^^^(10^^)^520 ee500)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10)|10, which defeats the purpose again.<br/>
-      You guess it, there's a solution to that, to. Mx is defined as:<br/>
-      <ul>
-        <li>x&lt;2: (1,3)|x</li>
-        <li>x&gt;2: (1,x)|10</li>
-      </ul>
-      That top rule actually exists in J: it's so the repitions don't blow up so quickly. Now you can write the above as M^33 (1,20)|(1,20)|((1,12)|)^51 L^5 10^^^(10^^)^520 ee500.
+      Now we will be back to what made us create J in the first place. Eventually, we will be writing numbers like 10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{10{{(10{{20}})^2 (10{{12}})^51 (10{{2}})^5 10^^^(10^^)^520 ee500}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10}}10, which defeats the purpose again.<br/>
+      You guessed it, there's a solution to that, to. Mx is defined as 10{{x}}10, and solves the above problem.<br/>
+      Now you can write the above as M^33 (10{{20}})^2 (10{{12}})^51 (10{{2}})^5 10^^^(10^^)^520 ee500.
     </p>
   </body>
 </html>
