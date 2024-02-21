@@ -10,7 +10,7 @@
     external = true,
     explodoNumError = "[ExplodoNumError]",
     invalidArgument = `${explodoNumError} Invalid argument:`,
-    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(J+|(J+|J(\^+|\{[1-9]\d*\})[1-9]\d* |\(J(\^+|\{[1-9]\d*\})[1-9]\d*\)\^[1-9]\d* )*)?(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
+    isExplodoNum = /^[-\+]*(Infinity|NaN|(M+|M\^\d+ )?(10\{\{0|[1-9]\d*\}\}|\(10\{\{0|[1-9]\d*\}\}\)\^[1-9]\d* )*(10(\^+|\{[1-9]\d*\})|\(10(\^+|\{[1-9]\d*\})\)\^[1-9]\d* )*((\d+(\.\d*)?|\d*\.\d+)?([Ee][-\+]*))*(0|\d+(\.\d*)?|\d*\.\d+))$/,
     MAX_SAFE_INTEGER = 9007199254740991,
     MAX_E = Math.log10(MAX_SAFE_INTEGER),
     P = {},
@@ -62,10 +62,10 @@
       for (var i=0,l=Math.min(this.layer.length,other.layer.length);i<l;++i){
         e=this.layer[this.layer.length-1-i];
         f=other.layer[other.layer.length-1-i];
-        if (e[0]>f[0]||e[0]==f[0]&&e[1]>f[1]||e[0]==f[0]&&e[1]==f[1]&&e[2]>f[2]){
+        if (e[0]>f[0]||e[0]==f[0]&&e[1]>f[1]){
           r=1;
           break;
-        }else if (e[0]<f[0]||e[0]==f[0]&&e[1]<f[1]||e[0]==f[0]&&e[1]==f[1]&&e[2]<f[2]){
+        }else if (e[0]<f[0]||e[0]==f[0]&&e[1]<f[1]){
           r=-1;
           break;
         }
@@ -239,25 +239,24 @@
     else return list.filter((e)=>e<operator).length-0.5+isLayer;
   }
   
-  P.getOperator = function(get,operator){
-    let index = this.getOperatorIndex(get!==0,operator);
+  P.getOperator = function(isLayer,operator){
+    let index = this.getOperatorIndex(isLayer,operator);
     if(Number.isInteger(index)){
-      if(get===0) return this.array[index][1];
-      else return this.layer[index][get];
+      if(isLayer) return this.layer[index][1];
+      else return this.array[index][1];
     }
-    return get===0?(operator===0?10:0):0;
+    return isLayer?0:(operator===0?10:0);
   }
 
-  P.setOperator = function(set,operator,value){
-    let index = this.getOperatorIndex(set!==0,operator);
+  P.setOperator = function(isLayer,operator,value){
+    let index = this.getOperatorIndex(isLayer,operator);
     if(Number.isInteger(index)){
-      if(set===0) this.array[index][1] = value;
-      else this.layer[index][set] = value;
+      if(isLayer) this.layer[index][1] = value;
+      else this.array[index][1] = value;
     } else {
       index = Math.ceil(index);
-      if(set===0) this.array.splice(index,0,[operator,value]);
-      else if(set===1) this.layer.splice(index,0,[operator,value,1]);
-      else this.layer.splice(index,0,[operator,2,value]);
+      if(isLayer) this.layer.splice(index,0,[operator,value]);
+      else this.array.splice(index,0,[operator,value]);
     }
     //this.normalize();
   }
@@ -395,7 +394,7 @@
       return x;
     }
     else{
-      var a,b,c,d,e,i;
+      var a,b,c,d,i;
       if (string[0]=="M"){
         if (string[1]=="^"){
           a=string.substring(2).search(/[^0-9]/)+2;
@@ -408,37 +407,15 @@
         }
       }
       while (string){
-        if (string.includes("J")){
+        if (/^\(?10\{\{/.test(string)){
           if (string[0]=="("){
             string=string.substring(1);
           }
-          let arrows;
-          e = 0
-          if(/\d/.test(string[1])){
-            arrows = 1;
-            b = 1;
-            e = 1;
-          } else if (string[1]=="J"){
-            a=string.substring(1).search(/[^J]/);
-            e=a+1;
-            arrows = 1;
-            b=a+1;
-          } else if (string[1]=="^"){
-            a=string.substring(1).search(/[^\^]/);
-            arrows=a;
-            b=a+1;
-          }else{
-            a=string.indexOf("}");
-            arrows=Number(string.substring(2,a));
-            b=a;
-          }
+          var arrows;
+          a=string.indexOf("}");
+          arrows=Number(string.substring(4,a));
+          b=a+1;
           string=string.substring(b);
-          c = string.search(/[\) ]/);
-          d = string.substring(0,c)
-          if(e===0){
-            b = parseInt(d);
-            string = string.substring(c)
-          } else b = e;
           if (string[0]==")"){
             a=string.indexOf(" ");
             c=Number(string.substring(2,a));
@@ -446,26 +423,31 @@
           }else{
             c=1;
           }
-          if (arrows==1){
-            if (x.layer.length>=3&&x.layer[1][0]==1){
-              x.layer[1][2]+=c;
+          if (arrows==0){
+            if (x.layer.length>=2&&x.layer[1][0]==1){
+              x.array[1][1]+=c;
             }else{
-              x.layer.splice(1,0,[1,b,c]);
+              x.layer.splice(1,0,[1,c]);
             }
           }else if (arrows==2){
+            a=x.layer.length>=2&&x.layer[1][0]==1?x.layer[1][1]:0;
+            b=x.array[0][1];
+            if (b>=1e10) ++a;
+            if (b>=10) ++a;
+            x.array[0][1]=a;
             if (x.layer.length>=2&&x.layer[1][0]==1) x.layer.splice(1,1);
             d=x.getOperatorIndex(true,2);
-            if (Number.isInteger(d)){
-              x.layer[d][2]+=c
-              if(b>x.layer[d][1]) x.layer[d][1] = b;
-            } else x.layer.splice(Math.ceil(d),0,[2,b,c]);
+            if (Number.isInteger(d)) x.layer[d][1]+=c;
+            else x.layer.splice(Math.ceil(d),0,[2,c]);
           }else{
-            d=x.getOperatorIndex(true,arrows);
+            a=x.getOperator(true,arrows-1);
+            b=x.getOperator(true,arrows-2);
+            if (b>=10) ++a;
+            d=x.getOperatorIndex(ture,arrows);
             x.layer.splice(1,Math.ceil(d)-1);
-            if (Number.isInteger(d)){
-              x.layer[1][2]+=c;
-              if(b>x.layer[1][1]) x.layer[1][1] = b;
-            } else x.layer.splice(1,0,[arrows,b,c]);
+            x.array[0][1]=a;
+            if (Number.isInteger(d)) x.layer[1][1]+=c;
+            else x.layer.splice(1,0,[arrows,c]);
           }
         }else{
           break;
@@ -589,32 +571,23 @@
     if(this.layer.length>=2){
       let layer = Array.from(this.layer).slice(1).reverse();
       for(let j of layer){
-        let omegaArrow = "J";
-        if(j[0]==1) omegaArrow = "J";
-        else if(j[0]<4) omegaArrow += "^".repeat(j[0]-1);
-        else omegaArrow += "{"+String(j[0])+"}";
-        if(j[0]==1){
-          let total = j[1]*(j[2]>0?j[2]:1);
-          if(total<4) omegaArrow = omegaArrow.repeat(total);
-          else omegaArrow += "^"+String(total)+" ";
-        } else omegaArrow += "^"+String(j[1]);
-        if(j[0]==1) string += omegaArrow;
-        else if(j[2]<4) string += (omegaArrow+" ").repeat(j[2]);
+        let omegaArrow = "10{{"+String(j[0]);
+        if(j[2]==1) string += omegaArrow;
         else string += "("+omegaArrow+")^"+String(j[2])+" ";
       }
     }
     if(this.array.length>=3||this.array.length==2&&this.array[1][0]>=2){
-      let array = Array.from(this.layer).slice(2-parseInt(this.array.length==2)).reverse();
+      let array = Array.from(this.array).slice(2-Number(this.array.length==2)).reverse();
       for(let arrow of array){
         let natArrow = "10";
         if(arrow[0]<4) natArrow += "^".repeat(arrow[0]);
         else natArrow += "{"+String(arrow[0])+"}";
-        if(arrow[1]>=4) string += "("+natArrow+")^"+String(arrow[1])+" ";
+        if(arrow[1]>=2) string += "("+natArrow+")^"+String(arrow[1])+" ";
         else if(arrow[1]>0) string += natArrow.repeat(arrow[1]);
       }
     }
-    let operator0 = this.getOperator(0,0);
-    let operator1 = this.getOperator(0,1);
+    let operator0 = this.getOperator(false,0);
+    let operator1 = this.getOperator(false,1);
     if(operator1<=0) string += String(operator0);
     else if(operator1==1) string += String(10**(operator0%1))+"e"+String(Math.floor(operator0));
     else if(operator1==2) string += String(10**((10**(operator0%1))%1))+"e"+String(10**(operator0%1))+"e"+String(Math.floor(operator0));
